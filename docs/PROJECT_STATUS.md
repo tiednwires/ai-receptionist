@@ -1,5 +1,3 @@
-
-
 # AI Receptionist Project Status
 
 Last updated: 2026-09-11
@@ -52,19 +50,33 @@ python -m uvicorn app.main:app --reload --reload-exclude ".venv/*"
 
 The `.venv` exclusion prevents Uvicorn's file watcher from repeatedly restarting when package files change.
 
-### Verified Endpoint
+### Verified Endpoints
 
 ```text
 GET /health
+POST /receptionist/intake
 ```
 
-Current response:
+The health endpoint returns HTTP `200 OK` with:
 
 ```json
 {"status":"healthy"}
 ```
 
-The endpoint returned HTTP `200 OK`, confirming the local backend is working.
+The receptionist intake endpoint has also been tested successfully through FastAPI Swagger UI. It accepts validated residential painting customer intake data and returned HTTP `200 OK`.
+
+Example successful response:
+
+```json
+{
+  "status": "received",
+  "message": "Customer intake received successfully.",
+  "customer_name": "John Smith",
+  "project_type": "interior"
+}
+```
+
+This confirms that the receptionist router is registered with FastAPI and that the request and response models are working.
 
 ## Packages Currently Used
 The project currently includes:
@@ -91,7 +103,7 @@ The first usable version should eventually be able to:
 - Handle situations it cannot resolve by collecting a message or escalating to a human.
 
 ## Current Development Stage
-**Stage: Backend foundation**
+**Stage: Receptionist API foundation**
 
 Completed:
 - Repository created.
@@ -101,11 +113,15 @@ Completed:
 - Basic FastAPI application created.
 - `/health` endpoint created and tested successfully.
 - Uvicorn reload configuration corrected to ignore `.venv`.
+- Added `ProjectType`, `ReceptionistIntakeRequest`, and `ReceptionistIntakeResponse` Pydantic models.
+- Added `POST /receptionist/intake` route.
+- Registered the receptionist router with the main FastAPI application.
+- Verified the receptionist intake endpoint through Swagger UI with a realistic residential painting customer request and HTTP `200 OK` response.
 
 ## Exact Next Step
-Design and implement the first receptionist API layer before adding telephony or AI-model integration.
+Add an application service/state layer so validated receptionist intake data can be retained and processed instead of being discarded after the HTTP response.
 
-The next development task is to define the basic call/customer data models and create an initial API route that represents an incoming receptionist interaction. This gives us a clean backend contract before connecting a phone provider, an LLM, or Google Calendar.
+The immediate development task is to separate intake handling from the API route and introduce a simple development-stage storage mechanism. This will give later scheduling and conversation logic a stable place to retrieve customer/project information before Google Calendar or LLM integration is added.
 
 ## Later Integration Order
 A reasonable implementation sequence is:
