@@ -1,3 +1,9 @@
+# Web API framework
 fastapi==0.128.8
+
+# ASGI development and production server; the standard extra installs useful
+# optional dependencies such as the reload file watcher.
 uvicorn[standard]==0.39.0
+
+# Environment-variable and .env-based application configuration
 pydantic-settings==2.15.0

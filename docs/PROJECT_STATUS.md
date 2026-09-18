@@ -1,6 +1,6 @@
 # AI Receptionist Project Status
 
-Last updated: 2026-09-11
+Last updated: 2026-09-18
 
 ## Project Goal
 Build an AI phone receptionist for a residential painting business. The system should answer customer calls, handle basic questions, collect job details, and help schedule appointments.
@@ -55,28 +55,16 @@ The `.venv` exclusion prevents Uvicorn's file watcher from repeatedly restarting
 ```text
 GET /health
 POST /receptionist/intake
+GET /receptionist/intakes
 ```
 
-The health endpoint returns HTTP `200 OK` with:
+The health endpoint returns HTTP `200 OK`.
 
-```json
-{"status":"healthy"}
-```
+The POST endpoint accepts a validated residential painting intake, stores it through `IntakeService`, and returns HTTP `200 OK`.
 
-The receptionist intake endpoint has also been tested successfully through FastAPI Swagger UI. It accepts validated residential painting customer intake data and returned HTTP `200 OK`.
+The GET endpoint returns every intake stored during the current application process. Testing confirmed that a customer submitted through POST could be retrieved through GET with all fields intact.
 
-Example successful response:
-
-```json
-{
-  "status": "received",
-  "message": "Customer intake received successfully.",
-  "customer_name": "John Smith",
-  "project_type": "interior"
-}
-```
-
-This confirms that the receptionist router is registered with FastAPI and that the request and response models are working.
+This verifies that the receptionist router, Pydantic models, and shared in-memory service are working together correctly.
 
 ## Packages Currently Used
 The project currently includes:
@@ -90,6 +78,9 @@ The project currently includes:
 3. FastAPI will provide the backend/API layer.
 4. Development work and documentation will be stored in GitHub.
 5. Project decisions, implementation progress, and the exact next step should be recorded in the repository so development does not depend on chat history.
+6. API routes should remain thin; intake storage and other business logic belong in service classes.
+7. Intake storage is intentionally temporary and in memory at this stage. Restarting the application clears the stored data.
+8. A database, LLM, telephony provider, and Google Calendar integration should not be introduced until the current API foundation is tested.
 
 ## Planned MVP Capabilities
 The first usable version should eventually be able to:
@@ -117,11 +108,20 @@ Completed:
 - Added `POST /receptionist/intake` route.
 - Registered the receptionist router with the main FastAPI application.
 - Verified the receptionist intake endpoint through Swagger UI with a realistic residential painting customer request and HTTP `200 OK` response.
+- Added `IntakeService` with temporary in-memory storage.
+- Added `create_intake()` and `get_all_intakes()` service methods.
+- Created one shared `intake_service` instance.
+- Updated `POST /receptionist/intake` to store validated requests through the service layer.
+- Added `GET /receptionist/intakes`.
+- Tested the service directly from Python.
+- Verified POST and GET through Swagger with a realistic painting customer intake.
+- Confirmed the submitted intake remains available across requests while the application process is running.
 
 ## Exact Next Step
-Add an application service/state layer so validated receptionist intake data can be retained and processed instead of being discarded after the HTTP response.
 
-The immediate development task is to separate intake handling from the API route and introduce a simple development-stage storage mechanism. This will give later scheduling and conversation logic a stable place to retrieve customer/project information before Google Calendar or LLM integration is added.
+Add automated tests for `IntakeService` and the receptionist API routes.
+
+The tests should verify intake creation, retrieval, POST/GET retention within one application process, and request validation. Keep storage in memory and do not begin database, LLM, telephony, or Google Calendar integration yet.
 
 ## Later Integration Order
 A reasonable implementation sequence is:
