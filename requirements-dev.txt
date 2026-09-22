@@ -1,0 +1,8 @@
+# Install the application's normal runtime dependencies first.
+-r requirements.txt
+
+# Test runner used for service and API tests.
+pytest==9.1.1
+
+# HTTP client required by FastAPI's TestClient.
+httpx==0.28.1

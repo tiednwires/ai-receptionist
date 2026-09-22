@@ -1,6 +1,6 @@
 # AI Receptionist Project Status
 
-Last updated: 2026-09-18
+Last updated: 2026-09-22
 
 ## Project Goal
 Build an AI phone receptionist for a residential painting business. The system should answer customer calls, handle basic questions, collect job details, and help schedule appointments.
@@ -37,7 +37,11 @@ ai-receptionist/
   ```bash
   source .venv/bin/activate
   ```
-- Dependencies are installed from `requirements.txt`.
+- Runtime dependencies are installed from `requirements.txt`.
+- Development and testing dependencies are installed from `requirements-dev.txt`.
+- The automated test suite runs with:
+  ```bash
+  python -m pytest -v
 
 ## Backend Status
 The FastAPI application is running successfully.
@@ -67,10 +71,17 @@ The GET endpoint returns every intake stored during the current application proc
 This verifies that the receptionist router, Pydantic models, and shared in-memory service are working together correctly.
 
 ## Packages Currently Used
-The project currently includes:
+
+Runtime dependencies:
+
 - FastAPI
 - Uvicorn
 - pydantic-settings
+
+Development and testing dependencies:
+
+- pytest
+- HTTPX
 
 ## Decisions Made So Far
 1. The initial use case will focus on a home-painting contractor rather than a generic business.
@@ -116,12 +127,31 @@ Completed:
 - Tested the service directly from Python.
 - Verified POST and GET through Swagger with a realistic painting customer intake.
 - Confirmed the submitted intake remains available across requests while the application process is running.
+- Added `requirements-dev.txt` for development and testing dependencies.
+- Added automated unit tests for `IntakeService`.
+- Verified that a new service starts empty.
+- Verified that `create_intake()` stores and returns an intake.
+- Verified that `get_all_intakes()` returns a copy that protects internal service state.
+- Added automated API tests using FastAPI’s `TestClient`.
+- Added isolated test setup so stored intakes do not leak between API tests.
+- Verified that `GET /receptionist/intakes` starts empty.
+- Verified POST/GET retention within one application process.
+- Verified that invalid project types and missing required fields return HTTP `422`.
+- Ran the complete automated test suite successfully: `7 passed`.
 
 ## Exact Next Step
 
-Add automated tests for `IntakeService` and the receptionist API routes.
+Add a small, deterministic business-knowledge service for approved painting-company FAQs.
 
-The tests should verify intake creation, retrieval, POST/GET retention within one application process, and request validation. Keep storage in memory and do not begin database, LLM, telephony, or Google Calendar integration yet.
+The next milestone should:
+
+1. Define the initial business information the receptionist may provide, such as services offered, business hours, service area, estimate policy, and basic preparation guidance.
+2. Add a narrow service that returns approved answers without using an LLM.
+3. Keep the API routes thin and place FAQ lookup logic in the service layer.
+4. Add automated tests for recognized and unrecognized FAQ topics.
+5. Keep all information local and temporary for now.
+
+Do not begin LLM, telephony, Google Calendar, database, or deployment integration yet.
 
 ## Later Integration Order
 A reasonable implementation sequence is:
