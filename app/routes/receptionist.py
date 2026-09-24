@@ -1,7 +1,9 @@
 """HTTP endpoints for the receptionist intake workflow."""
 
 # APIRouter groups related endpoints so they can be registered together.
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from app.models.business_knowledge import BusinessInformationResponse
+from app.services.business_knowledge_service import business_knowledge_service
 
 # Import the shared intake service so every receptionist route can use the
 # same temporary in-memory storage while the application is running.
@@ -47,3 +49,26 @@ def get_intakes() -> list[ReceptionistIntakeRequest]:
 
     # Ask the service for a copy of its current in-memory intake list.
     return intake_service.get_all_intakes()
+
+
+@router.get(
+    "/business-information/{topic}",
+    response_model=BusinessInformationResponse,
+)
+def get_business_information(topic: str) -> BusinessInformationResponse:
+    """Return an approved business answer for a recognized topic."""
+
+    # Keep lookup behavior in the service rather than in the API route.
+    answer = business_knowledge_service.get_business_information(topic)
+
+    # An unknown topic has no approved answer, so report that clearly.
+    if answer is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Approved business information was not found for this topic.",
+        )
+
+    return BusinessInformationResponse(
+        topic=topic,
+        answer=answer,
+    )

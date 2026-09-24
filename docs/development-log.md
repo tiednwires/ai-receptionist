@@ -65,3 +65,36 @@ Intake storage remains intentionally temporary and in memory. Restarting the app
 ### Next step
 
 Add a deterministic business-knowledge service for approved painting-company FAQs, with automated tests, before introducing any LLM or external integration.
+
+
+## 2026-09-24 - Deterministic business knowledge
+
+### Work completed
+
+- Added approved painting-company information in `config/business.json`.
+- Added `BusinessKnowledgeService` to load approved answers from the JSON file.
+- Added topic normalization for capitalization, spaces, hyphens, underscores, and surrounding whitespace.
+- Added `BusinessInformationResponse`.
+- Added `GET /receptionist/business-information/{topic}`.
+- Added service and API tests for recognized and unknown topics.
+
+### Verification
+
+- Confirmed recognized topics return the approved local answer.
+- Confirmed unknown topics return `None` from the service.
+- Confirmed the API returns HTTP `200` for recognized topics.
+- Confirmed the API returns HTTP `404` for unknown topics.
+- Ran the complete suite with `python -m pytest -v`.
+- Result: `12 passed`.
+
+### Known warning
+
+The suite still reports one deprecation warning from Starlette’s internal `TestClient` integration with AnyIO. It originates in an installed dependency and does not cause a test failure.
+
+### Current limitation
+
+Business information is local and read-only. There is no database, administrative interface, or external knowledge source.
+
+### Next step
+
+Add and test deterministic estimate-scheduling rules without connecting to Google Calendar yet.

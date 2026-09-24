@@ -1,6 +1,6 @@
 # AI Receptionist Project Status
 
-Last updated: 2026-09-22
+Last updated: 2026-09-24
 
 ## Project Goal
 Build an AI phone receptionist for a residential painting business. The system should answer customer calls, handle basic questions, collect job details, and help schedule appointments.
@@ -42,6 +42,7 @@ ai-receptionist/
 - The automated test suite runs with:
   ```bash
   python -m pytest -v
+  ```
 
 ## Backend Status
 The FastAPI application is running successfully.
@@ -56,11 +57,10 @@ The `.venv` exclusion prevents Uvicorn's file watcher from repeatedly restarting
 
 ### Verified Endpoints
 
-```text
 GET /health
 POST /receptionist/intake
 GET /receptionist/intakes
-```
+GET /receptionist/business-information/{topic}
 
 The health endpoint returns HTTP `200 OK`.
 
@@ -69,6 +69,8 @@ The POST endpoint accepts a validated residential painting intake, stores it thr
 The GET endpoint returns every intake stored during the current application process. Testing confirmed that a customer submitted through POST could be retrieved through GET with all fields intact.
 
 This verifies that the receptionist router, Pydantic models, and shared in-memory service are working together correctly.
+
+The business-information endpoint returns an approved answer from the local business configuration for recognized topics. Unknown topics return HTTP `404 Not Found`.
 
 ## Packages Currently Used
 
@@ -137,19 +139,28 @@ Completed:
 - Verified that `GET /receptionist/intakes` starts empty.
 - Verified POST/GET retention within one application process.
 - Verified that invalid project types and missing required fields return HTTP `422`.
-- Ran the complete automated test suite successfully: `7 passed`.
+- Added approved painting-company information in `config/business.json`.
+- Added `BusinessKnowledgeService` to load and retrieve approved answers.
+- Added topic normalization so spaces, hyphens, underscores, capitalization, and surrounding whitespace resolve consistently.
+- Added `BusinessInformationResponse`.
+- Added `GET /receptionist/business-information/{topic}`.
+- Added service tests for recognized, unknown, and differently formatted topics.
+- Added API tests for successful and unknown business-information requests.
+- Ran the complete automated test suite successfully: `12 passed`.
 
 ## Exact Next Step
 
-Add a small, deterministic business-knowledge service for approved painting-company FAQs.
+Add deterministic estimate-scheduling rules without connecting to Google Calendar yet.
 
 The next milestone should:
 
-1. Define the initial business information the receptionist may provide, such as services offered, business hours, service area, estimate policy, and basic preparation guidance.
-2. Add a narrow service that returns approved answers without using an LLM.
-3. Keep the API routes thin and place FAQ lookup logic in the service layer.
-4. Add automated tests for recognized and unrecognized FAQ topics.
-5. Keep all information local and temporary for now.
+1. Define request and response models for a proposed estimate appointment.
+2. Add a scheduling service that works with Python dates and times.
+3. Allow estimates only Monday through Friday.
+4. Reject same-day and past appointments.
+5. Reject appointments more than 30 days in advance.
+6. Add automated tests for valid and invalid scheduling requests.
+7. Keep the scheduling logic separate from the API route.
 
 Do not begin LLM, telephony, Google Calendar, database, or deployment integration yet.
 

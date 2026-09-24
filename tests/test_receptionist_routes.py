@@ -9,7 +9,7 @@ from app.services.intake_service import IntakeService
 @pytest.fixture
 def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     # Replace the routes module's shared service with a fresh service for each test.
-    # This Prevents stored customers from leaking between seperate tests.
+    # This prevents stored customers from leaking between separate tests.
     monkeypatch.setattr(
         receptionist_routes,
         "intake_service",
@@ -65,7 +65,7 @@ def test_create_intake_is_returned_by_get(client: TestClient) -> None:
 
 
 def test_create_intake_rejects_invalid_project_type(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     # Arrange: provide a project type outside interior, exterior, or both.
     invalid_intake = {
@@ -76,10 +76,10 @@ def test_create_intake_rejects_invalid_project_type(
         "project_scope": "Replace the roof",
     }
 
-    # Act: submot the invalid request.
+    # Act: submit the invalid request.
     response = client.post(
         "/receptionist/intake",
-        json=invalid_intake
+        json=invalid_intake,
     )
 
     # Assert: FastAPI rejects it as an unprocessable request.
@@ -87,7 +87,7 @@ def test_create_intake_rejects_invalid_project_type(
 
 
 def test_create_intake_rejects_missing_phone_number(
-        client: TestClient,
+    client: TestClient,
 ) -> None:
     # Arrange: missing phone_number, which the intake model requires.
     incomplete_intake = {
@@ -103,7 +103,7 @@ def test_create_intake_rejects_missing_phone_number(
         json=incomplete_intake,
     )
 
-    # Assert: validation fails and indentifies phone_number as missing.
+    # Assert: validation fails and identifies phone_number as missing.
     assert response.status_code == 422
 
     error_fields = {
@@ -111,3 +111,36 @@ def test_create_intake_rejects_missing_phone_number(
         for error in response.json()["detail"]
     }
     assert "phone_number" in error_fields
+
+
+def test_get_business_information_returns_approved_answer(
+    client: TestClient,
+) -> None:
+    # Act: request a recognized topic through the API.
+    response = client.get(
+        "/receptionist/business-information/business-hours"
+    )
+
+    # Assert: the route returns the approved answer.
+    assert response.status_code == 200
+    assert response.json() == {
+        "topic": "business-hours",
+        "answer": "Monday through Friday, 8:00 AM to 5:00 PM.",
+    }
+
+
+def test_get_business_information_returns_404_for_unknown_topic(
+    client: TestClient,
+) -> None:
+    # Act: request a topic that has no approved answer.
+    response = client.get(
+        "/receptionist/business-information/pricing"
+    )
+
+    # Assert: the route reports that the information was not found.
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": (
+            "Approved business information was not found for this topic."
+        )
+    }
