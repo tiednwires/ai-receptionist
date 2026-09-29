@@ -16,6 +16,13 @@ from app.models.receptionist import (
     ReceptionistIntakeResponse,
 )
 
+from app.models.scheduling import (
+    EstimateSchedulingRequest,
+    EstimateSchedulingResponse,
+)
+
+from app.services.scheduling_service import scheduling_service
+
 # Every route in this module begins with /receptionist. The tag groups these
 # endpoints together in FastAPI's generated Swagger documentation.
 router = APIRouter(prefix="/receptionist", tags=["receptionist"])
@@ -72,3 +79,16 @@ def get_business_information(topic: str) -> BusinessInformationResponse:
         topic=topic,
         answer=answer,
     )
+
+
+@router.post(
+    "/estimate-availability",
+    response_model=EstimateSchedulingResponse,
+)
+def evaluate_estimate_availability(
+    request: EstimateSchedulingRequest,
+) -> EstimateSchedulingResponse:
+    """Evaluate a proposed estimate appointment against business rules."""
+
+    # The route handles HTTP input and output while the service owns the rules.
+    return scheduling_service.evaluate_request(request)

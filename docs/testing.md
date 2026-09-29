@@ -23,7 +23,7 @@ python -m pytest -v
 Current expected result:
 
 ```text
-12 passed
+23 passed
 ```
 
 ## Run One Test File
@@ -46,6 +46,12 @@ Receptionist API tests:
 python -m pytest tests/test_receptionist_routes.py -v
 ```
 
+Scheduling-service tests:
+
+```bash
+python -m pytest tests/test_scheduling_service.py -v
+```
+
 ## Current Test Coverage
 
 The suite verifies:
@@ -58,6 +64,11 @@ The suite verifies:
 - Normalization of business-information topics.
 - HTTP `200` responses for recognized business topics.
 - HTTP `404` responses for unknown business topics.
+- Parsing proposed appointment dates and times into Python values.
+- Acceptance of valid weekday scheduling requests.
+- Rejection of same-day, past, weekend, too-distant, and out-of-hours requests.
+- Inclusion of the 8:00 AM and 4:00 PM scheduling boundaries.
+- Scheduling decisions returned through the receptionist API.
 
 ## Known Warning
 

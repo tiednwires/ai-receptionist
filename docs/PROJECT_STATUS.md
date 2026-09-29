@@ -1,6 +1,6 @@
 # AI Receptionist Project Status
 
-Last updated: 2026-09-24
+Last updated: 2026-09-29
 
 ## Project Goal
 Build an AI phone receptionist for a residential painting business. The system should answer customer calls, handle basic questions, collect job details, and help schedule appointments.
@@ -61,6 +61,7 @@ GET /health
 POST /receptionist/intake
 GET /receptionist/intakes
 GET /receptionist/business-information/{topic}
+POST /receptionist/estimate-availability
 
 The health endpoint returns HTTP `200 OK`.
 
@@ -71,6 +72,8 @@ The GET endpoint returns every intake stored during the current application proc
 This verifies that the receptionist router, Pydantic models, and shared in-memory service are working together correctly.
 
 The business-information endpoint returns an approved answer from the local business configuration for recognized topics. Unknown topics return HTTP `404 Not Found`.
+
+
 
 ## Packages Currently Used
 
@@ -146,21 +149,29 @@ Completed:
 - Added `GET /receptionist/business-information/{topic}`.
 - Added service tests for recognized, unknown, and differently formatted topics.
 - Added API tests for successful and unknown business-information requests.
-- Ran the complete automated test suite successfully: `12 passed`.
+- Added `EstimateSchedulingRequest` and `EstimateSchedulingResponse`.
+- Added `SchedulingService` with deterministic date and time rules.
+- Required appointments to be after the current date and no more than 30 days ahead.
+- Limited appointments to Monday through Friday.
+- Limited estimate start times to 8:00 AM through 4:00 PM.
+- Added `POST /receptionist/estimate-availability`.
+- Added nine scheduling-service test cases.
+- Added two scheduling API tests.
+- Ran the complete automated test suite successfully: `23 passed`.
 
 ## Exact Next Step
 
-Add deterministic estimate-scheduling rules without connecting to Google Calendar yet.
+Add temporary in-memory estimate booking and conflict detection without connecting to Google Calendar yet.
 
 The next milestone should:
 
-1. Define request and response models for a proposed estimate appointment.
-2. Add a scheduling service that works with Python dates and times.
-3. Allow estimates only Monday through Friday.
-4. Reject same-day and past appointments.
-5. Reject appointments more than 30 days in advance.
-6. Add automated tests for valid and invalid scheduling requests.
-7. Keep the scheduling logic separate from the API route.
+1. Store accepted estimate appointments in memory.
+2. Treat each estimate as a 60-minute appointment.
+3. Reject a proposed appointment when it overlaps an existing appointment.
+4. Provide an API route that creates a booking only after all scheduling rules pass.
+5. Add an API route that returns the current temporary bookings.
+6. Add automated tests for successful bookings and scheduling conflicts.
+7. Keep appointment storage and conflict logic in the service layer.
 
 Do not begin LLM, telephony, Google Calendar, database, or deployment integration yet.
 

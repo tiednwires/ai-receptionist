@@ -98,3 +98,34 @@ Business information is local and read-only. There is no database, administrativ
 ### Next step
 
 Add and test deterministic estimate-scheduling rules without connecting to Google Calendar yet.
+
+
+## 2026-09-29 - Deterministic estimate scheduling
+
+### Work completed
+
+- Added request and response models using Python `date` and `time` values.
+- Added `SchedulingService`.
+- Added rules for future dates, the 30-day scheduling window, weekdays, and business hours.
+- Added `POST /receptionist/estimate-availability`.
+- Kept scheduling decisions in the service layer rather than the API route.
+- Added scheduling-service and API tests.
+
+### Verification
+
+- Confirmed valid weekday appointments are allowed.
+- Confirmed same-day and past appointments are rejected.
+- Confirmed weekend appointments are rejected.
+- Confirmed appointments more than 30 days ahead are rejected.
+- Confirmed appointments before 8:00 AM or after 4:00 PM are rejected.
+- Confirmed the opening and latest-start boundaries are accepted.
+- Ran the complete suite with `python -m pytest -v`.
+- Result: `23 passed`.
+
+### Current limitation
+
+The scheduling endpoint evaluates business rules but does not reserve a time or detect conflicts with other appointments.
+
+### Next step
+
+Add temporary in-memory estimate booking and conflict detection before connecting to Google Calendar.

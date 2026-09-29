@@ -1,9 +1,13 @@
+from datetime import date, timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 
 import app.routes.receptionist as receptionist_routes
 from app.main import app
 from app.services.intake_service import IntakeService
+
+
 
 
 @pytest.fixture
@@ -143,4 +147,58 @@ def test_get_business_information_returns_404_for_unknown_topic(
         "detail": (
             "Approved business information was not found for this topic."
         )
+    }
+
+
+def test_estimate_availability_accepts_valid_weekday(
+    client: TestClient,
+) -> None:
+    # Arrange: find the next weekday so the test works on any calendar date.
+    requested_date = date.today() + timedelta(days=1)
+    while requested_date.weekday() >= 5:
+        requested_date += timedelta(days=1)
+
+    request_data = {
+        "requested_date": requested_date.isoformat(),
+        "requested_time": "09:00",
+    }
+
+    # Act.
+    response = client.post(
+        "/receptionist/estimate-availability",
+        json=request_data,
+    )
+
+    # Assert.
+    assert response.status_code == 200
+    assert response.json() == {
+        "allowed": True,
+        "reason": "The proposed estimate time is available.",
+        "requested_date": requested_date.isoformat(),
+        "requested_time": "09:00:00",
+    }
+
+
+def test_estimate_availability_rejects_same_day(
+    client: TestClient,
+) -> None:
+    # Arrange: same-day estimates are not allowed.
+    request_data = {
+        "requested_date": date.today().isoformat(),
+        "requested_time": "09:00",
+    }
+
+    # Act.
+    response = client.post(
+        "/receptionist/estimate-availability",
+        json=request_data,
+    )
+
+    # Assert.
+    assert response.status_code == 200
+    assert response.json() == {
+        "allowed": False,
+        "reason": "Estimates must be scheduled after today.",
+        "requested_date": date.today().isoformat(),
+        "requested_time": "09:00:00",
     }
